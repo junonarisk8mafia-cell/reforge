@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0e0e10" />
+<title>REFORGE</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<style>
+  :root{
+    --bg:#0e0e10; --surface:#17171b; --surface-2:#1f1f25; --line:#2a2a31;
+    --text:#ececf0; --muted:#9a9aa6; --ember:#ff6a2b; --ember-dim:#b8461c; --steel:#7fb0c8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:-apple-system,"Hiragino Kaku Gothic ProN","Noto Sans JP",system-ui,sans-serif;
+    line-height:1.75;display:flex;flex-direction:column;min-height:100%;
+  }
+  header{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5;}
+  header .mark{width:24px;height:24px;flex:none;}
+  header .wordmark{font-weight:800;letter-spacing:3px;font-size:14px;}
+  header .streak{margin-left:auto;font-size:12px;color:var(--ember);font-weight:700;}
+  header .streak small{color:var(--muted);font-weight:400;}
+  main{flex:1;width:100%;max-width:620px;margin:0 auto;padding:20px 18px 96px;}
+  .view{display:none;flex-direction:column;gap:16px;}
+  .view.active{display:flex;}
+  .eyebrow{font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:13px;}
+  .track{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);}
+  .track.HEAD{color:var(--steel);border-color:#274653;}
+  .track.SHIELD{color:var(--ember);border-color:var(--ember-dim);}
+  .card h1{font-size:20px;line-height:1.45;font-weight:800;}
+  .card .body{font-size:15px;color:#d6d6dd;}
+  .hiire{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--ember);border-radius:10px;padding:13px;font-size:14px;}
+  .hiire .label{color:var(--ember);font-weight:700;font-size:12px;letter-spacing:1px;}
+  .note{font-size:13px;color:var(--steel);background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--steel);border-radius:10px;padding:11px 13px;}
+  .actions{display:flex;gap:10px;}
+  button{font-family:inherit;font-size:15px;font-weight:700;border:none;border-radius:12px;padding:14px 16px;cursor:pointer;}
+  .primary{flex:1;background:var(--ember);color:#14100d;}
+  .primary:active{background:var(--ember-dim);}
+  .ghost{background:transparent;color:var(--muted);border:1px solid var(--line);}
+  textarea{
+    width:100%;background:var(--surface);color:var(--text);border:1px solid var(--line);
+    border-radius:12px;padding:14px;font-family:inherit;font-size:15px;line-height:1.7;resize:vertical;min-height:96px;
+  }
+  textarea:focus{outline:none;border-color:var(--ember-dim);}
+  .oyakata{display:flex;flex-direction:column;gap:10px;}
+  .oyakata .part{display:flex;gap:10px;font-size:14.5px;color:#e2e2e8;}
+  .oyakata .part .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);color:var(--ember);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .choices{display:flex;flex-direction:column;gap:8px;}
+  .choice{text-align:left;background:var(--surface-2);border:1px solid var(--line);color:var(--text);font-weight:400;font-size:14px;padding:12px 13px;border-radius:10px;}
+  .choice.sel{border-color:var(--ember);color:#fff;}
+  .safe{background:#241012;border:1px solid #5a2226;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;}
+  .safe h2{font-size:17px;color:#ffb4a0;font-weight:800;}
+  .safe a{color:var(--steel);}
+  .logitem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:6px;}
+  .logitem .date{font-size:11px;color:var(--muted);letter-spacing:1px;}
+  .logitem .txt{font-size:14px;color:#e2e2e8;}
+  .logitem .act{font-size:13px;color:var(--ember);}
+  .streakbox{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;text-align:center;}
+  .streakbox .big{font-size:44px;font-weight:800;color:var(--ember);line-height:1;}
+  .streakbox .lbl{font-size:13px;color:var(--muted);margin-top:6px;}
+  .streakbox .sub{font-size:13px;color:#cfcfd6;margin-top:10px;}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 10px;}
+  nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);display:flex;max-width:620px;margin:0 auto;}
+  nav button{flex:1;background:transparent;border:none;border-radius:0;color:var(--muted);font-size:12px;font-weight:700;padding:12px 4px 16px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  nav button .ic{font-size:20px;line-height:1;}
+  nav button.on{color:var(--ember);}
+  .status{font-size:11px;color:var(--muted);text-align:center;}
+  .setrow{display:flex;align-items:center;gap:12px;}
+  .setrow label{font-size:14px;color:#cfcfd6;flex:none;width:64px;}
+  .setrow input[type=range]{flex:1;accent-color:var(--ember);}
+  .setrow .val{font-size:13px;color:var(--ember);width:36px;text-align:right;}
+  select{width:100%;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:inherit;font-size:14px;}
+  .preset{display:flex;gap:8px;flex-wrap:wrap;}
+  .preset button{flex:1;min-width:90px;background:var(--surface-2);border:1px solid var(--line);color:var(--text);font-size:13px;padding:11px 8px;}
+  .preset button.sel{border-color:var(--ember);color:#fff;}
+</style>
+</head>
+<body>
+<header>
+  <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 15c2.5-6 5.5-9 9-11 0 3-1 5-2 7 2-1 4-1 6 0-1 4-4 8-9 9-3 .8-5-1-4-5z" fill="#ff6a2b"/>
+  </svg>
+  <span class="wordmark">REFORGE</span>
+  <span class="streak" id="hdrStreak"></span>
+</header>
+
+<main>
+  <section class="view active" id="view-today">
+    <div class="eyebrow" id="today">— TODAY —</div>
+    <div class="card" id="card"></div>
+    <div class="note" id="note" style="display:none"></div>
+    <div class="actions">
+      <button class="primary" id="hiireBtn">🔥 この失敗を火入れする</button>
+      <button class="ghost" id="speakBtn" aria-label="読み上げ">🔊</button>
+      <button class="ghost" id="reloadBtn">別の1枚</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="view" id="view-translate">
+    <div class="eyebrow">— しくじり翻訳機 —</div>
+    <div class="card">
+      <div style="font-size:14px;color:#cfcfd6;">今日やっちまったことを、そのまま打て。親方が捉え直す。</div>
+      <textarea id="shikujiri" placeholder="例：溶接の歪みで一日分やり直し。親方に怒鳴られた。向いてないのかも。"></textarea>
+      <button class="primary" id="translateBtn" style="width:100%">親方に見せる</button>
+    </div>
+    <div id="result"></div>
+  </section>
+
+  <section class="view" id="view-settings">
+    <div class="eyebrow">— 声の設定 —</div>
+    <div class="card">
+      <div style="font-size:14px;color:#cfcfd6;">親方の声を、自分好みに調整できる。</div>
+      <div class="preset" id="voicePreset">
+        <button data-p="oyakata">親方（低・渋め）</button>
+        <button data-p="normal">標準</button>
+        <button data-p="fast">早口</button>
+      </div>
+      <div class="setrow"><label>高さ</label><input type="range" id="pitch" min="0" max="2" step="0.1" value="0.8"><span class="val" id="pitchV">0.8</span></div>
+      <div class="setrow"><label>速さ</label><input type="range" id="rate" min="0.5" max="1.5" step="0.05" value="0.95"><span class="val" id="rateV">0.95</span></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px;">声の種類（端末に入っている音声から）</div>
+      <select id="voiceSel"></select>
+      <button class="primary" id="testVoice" style="width:100%">この声で試す</button>
+    </div>
+    <div class="note" id="voiceNote" style="display:none"></div>
+  </section>
+
+  <section class="view" id="view-log">
+    <div class="eyebrow">— 鍛えた記録 —</div>
+    <div class="streakbox">
+      <div class="big" id="streakBig">0</div>
+      <div class="lbl">連続で鍛えた日数</div>
+      <div class="sub" id="streakSub"></div>
+    </div>
+    <div id="logList"></div>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-view="today"><span class="ic">🔥</span>今日</button>
+  <button data-view="translate"><span class="ic">🛠</span>しくじり</button>
+  <button data-view="log"><span class="ic">📓</span>記録</button>
+  <button data-view="settings"><span class="ic">🔊</span>声</button>
+</nav>
+
+<script>
+var CARDS = [
+  {track:"HEAD",title:'失敗した直後の90分は、記憶の"焼き入れ"時間だ',
+   body:'数をこなす仕事は、失敗するたびに脳が学習してる。ただし条件がある。失敗の直後、脳は「何がまずかったか」を高い解像度で刻める短い窓を持つ。ここで感情的に自分を殴ると、記憶にはミスじゃなく"自己否定"の方が焼き付く。逆に「どこで、なぜ、次どうする」を1回言語化すると、同じ失敗の再発率が落ちる。ベテランが同じミスをしないのは才能じゃない。この90分を、雑にしてこなかっただけだ。',
+   hiire:'今日いちばんの失敗を1個。「どこで・なぜ・次どうする」を一言で。'},
+  {track:"HEAD",title:'「自分はダメだ」より効くのは、自分への手加減だ',
+   body:'根性で自分を追い込むほど強くなる——現場ではそう言われる。だがデータは逆を指す。失敗のあと自分を責める人ほど、次の挑戦から早く逃げる。回復が速いのは「自己肯定感が高い人」ですらない。自分に手加減できる人(セルフ・コンパッション)だ。プロ選手の研究で、失敗からの立ち直りを一番強く予測したのはこれだった。手加減＝甘えじゃない。もう一回ハンマーを握るための、頭の整備だ。',
+   hiire:'今日のしくじりを、後輩に言うつもりで一言。責めずに、事実だけ。'},
+  {track:"HEAD",title:'睡眠を削った腕は、酔った腕と同じだ',
+   body:'「気合いで乗り切る」が一番きかないのが、寝不足だ。17〜19時間起き続けた人間の作業精度は、酒気帯びと同レベルまで落ちるという報告がある。つまり寝ないで頑張るほど、失敗の数が構造的に増える。根性の問題じゃない、計器の問題だ。腕を落としたくないなら、まず削るのは睡眠じゃない。',
+   hiire:'昨日の睡眠時間を1タップ記録。今日のミスと並べて見てみろ。'},
+  {track:"SHIELD",title:'その怪我、「自分のミスだから」で泣き寝入りするな',
+   body:'現場でケガをした。自分の不注意だった。だから労災は使えない——これは間違いだ。労災保険は、原則として本人の過失があっても給付される（重大な故意等の例外を除く）。「迷惑をかける」「気まずい」で申請しないと、治療費も休業補償も自腹になる。それはあなたが払う金じゃない。制度が払う金だ。',
+   hiire:'今日ヒヤリとした場面を1個記録。次に活かすか、報告するか決めろ。',reference:true},
+  {track:"SHIELD",title:'「一人親方」にされてないか、契約書を見ろ',
+   body:'仕事の指示も時間も相手が決めてるのに、契約は「業務委託（個人事業主）」——この形は、社会保険も残業代も労災も外される典型の罠だ。判断は肩書きじゃなく実態で決まる。指揮命令を受け、時間を拘束されているなら、"労働者"と認められる余地がある。名前が「委託」でも、中身が雇用なら、あなたには権利がある。',
+   hiire:'自分の契約が「委託」か「雇用」か、1タップで記録。あいまいなら要確認に。',reference:true},
+  {track:"SHIELD",title:'残業代は「もらえたら」じゃない。「発生してる」だ',
+   body:'定時を超えて働いた分は、頼まなくても法律上すでに発生している。会社が払わないのは、権利が無いからじゃなく、あなたが記録していないからだ。証拠は難しくない——自分で毎日、始業と終業の時刻をメモするだけでいい。それが後で、あなたの金を取り戻す一番強い材料になる。',
+   hiire:'今日の始業・終業時刻を記録。これは"火入れ"であり"証拠"だ。',reference:true}
+];
+
+var CRISIS = ["死にたい","消えたい","生きてる意味","自殺","首を","飛び降り","いなくなりたい","全部終わり","誰も助け"];
+
+var CATS = [
+  {id:"C01",kw:["やり直し","手戻り","一からやり直","無駄になった","全部やり直"],
+   parts:['やり直しか。丸一日が消えると、こたえるな。だが「お前がダメ」の証拠じゃない。',
+     '消えたのは"作業の時間"だ。お前の腕が消えたわけじゃねえ。',
+     '手戻りは、途中の確認を1回飛ばすと後半でまとめて出る。ベテランが少ないのは、才能じゃなく「途中で1回止まる癖」を持ってるだけだ。',
+     '次はここだ ↓',
+     'はい、火入れ完了。1日分の授業料、回収したな。'],
+   choices:['工程を3つに区切って、区切りごとに手を止めて確認する','やり直しになった原因を1個だけ書き出す','明日、同じ工程の前に先輩に一言確認する']},
+  {id:"C02",kw:["確認","測り間違","寸法","忘れた","段取り","指示と違","勘違い"],
+   parts:['確認が抜けたか。誰でもやる。で、それは注意力の問題じゃない。',
+     'ミスったのは"確認の手順"だ。お前の頭が悪いんじゃない。',
+     '人間は疲れと慣れで確認を"飛ばす"ようにできてる。脳が省エネするからだ。だから対策は根性じゃなく「仕組み」——指差し・声出し・チェック表が効く。',
+     '次はここだ ↓',
+     '火入れ完了。次から飛ばさなきゃいい、それだけだ。'],
+   choices:['その確認だけ、指差し＋声出しにする','よく飛ばす確認を1個、紙に書いて道具箱に貼る','作業前に「今日絶対確認する1個」を決める']},
+  {id:"C03",kw:["怒鳴","叱ら","親方に","先輩に","どやさ","恥かい","怒られ"],
+   parts:['怒鳴られたか。頭に血がのぼるし、へこむ。まずそれは当たり前だ。',
+     '相手が怒ったのは"その行為"に対してだ。お前の全部を否定したわけじゃない。怒声と中身は分けろ。',
+     '怒鳴られた直後は、脳が防御に入って中身が耳に入らない。だから一回落ち着いてから「何を直せと言われたか」だけ拾えばいい。感情はゴミ、指示だけ拾え。',
+     '次はここだ ↓',
+     '火入れ完了。怒声の中から使える1個、抜き取ったな。'],
+   choices:['言われた中で「直せる1個」だけ書き出す','感情は切って、明日その1個だけ試す','落ち着いたら、事実確認を一言だけ聞きに行く']},
+  {id:"C04",kw:["ケガ","怪我","切った","挟ん","ヒヤリ","危なかった","落ちそう","打った"],
+   parts:['ケガしたか（危なかったか）。まず体だ。無理はするな。',
+     'これは"その状況"で起きた。お前の不注意"だけ"のせいにするな。段取りと環境も原因のうちだ。',
+     '事故は「不注意な人」より「疲れ・急ぎ・慣れ」が重なった時に起きる。個人の問題にすると再発する。仕組みで潰すのが正解だ。',
+     '次はここだ ↓',
+     '火入れ完了。指1本、腕1本の方が仕事より重い。忘れるな。'],
+   choices:['同じヒヤリが起きた条件を1個記録する','（ケガなら）労災の対象か確認する（SHIELDの労災カード参照）','次に同じ場面が来たら止まる合図を決めておく']},
+  {id:"C05",kw:["遅刻","寝坊","起きられ","二日酔","だるい","体調","疲れて"],
+   parts:['寝坊したか。やっちまった感、あるよな。だが自分を殴る前に見るとこがある。',
+     '起きられなかったのは"その原因"だ。お前が"だらしない人間"って話じゃない。',
+     '睡眠を削った脳は、酒気帯びと同レベルまで判断が落ちる。つまり寝不足は遅刻だけじゃなく、日中の失敗も増やす。根性じゃなく、寝る時間の設計問題だ。',
+     '次はここだ ↓',
+     '火入れ完了。腕を守りたきゃ、まず寝ろ。'],
+   choices:['寝る時刻を15分だけ前に倒す','寝る前のスマホを1個だけ減らす','今日の睡眠時間を記録して、ミスの数と並べて見る']},
+  {id:"C06",kw:["覚えられ","伸びない","下手","上達しな","才能ない","不器用"],
+   parts:['伸びてる気がしない、な。焦るよな。だがそれは"才能が無い"の証拠じゃない。',
+     '今できてないのは"1つの技"だ。お前という人間の限界じゃない。',
+     '技術は直線で伸びない。しばらく変化ゼロに見えて、ある日まとめて繋がる（プラトー）。脳が裏で回路を作ってる期間だ。伸びてないんじゃなく、見えてないだけだ。',
+     '次はここだ ↓',
+     '火入れ完了。プラトーの底にいる奴ほど、次に化ける。'],
+   choices:['その技を1つの動作に分解して、今日は1動作だけ練習する','できた回数を記録して"線"で見る（1日単位で判断しない）','うまい人の手元を1点だけ観察する']},
+  {id:"C07",kw:["無視","嫌味","合わない","気まずい","いじられ","孤立","空気"],
+   parts:['現場の空気、しんどいよな。腕以外で消耗するのが一番きつい。',
+     'それは"相手との相性"の話で、お前の価値の話じゃない。仕事の腕とは別勘定だ。',
+     '人間は「仲間外れ」を痛みとして感じるようにできてる（脳の痛覚と近い場所が反応する）。だから効くのは我慢じゃなく、消耗を減らす距離の取り方だ。',
+     '次はここだ ↓',
+     '火入れ完了。現場は職場であって、家族じゃない。それでいい。'],
+   choices:['全員に好かれるのを捨てて、まともな1人とだけ話す','反応しない相手・場面を1個決める','仕事の評価と人間関係を、頭の中で分けて記録する']},
+  {id:"C08",kw:["遅い","間に合わ","追いつけ","もたつ","ペース","足引っ張","遅くて"],
+   parts:['遅い、と感じるか。周りと比べると焦るよな。だが速さは最後に来る。',
+     '今もたついてるのは"段取り"だ。お前の能力が低いって話じゃない。',
+     '速さは「慣れ」で自動化された動作の量で決まる。ベテランが速いのは頭の回転じゃなく、考えずに動ける手順が体に入ってるだけ。時間の問題で、才能じゃない。',
+     '次はここだ ↓',
+     '火入れ完了。速さは追うな。正確さを重ねると、勝手に速くなる。'],
+   choices:['一番もたつく工程を1個だけ、繰り返して体に入れる','段取り(道具の配置)を先に整えてから始める','昨日より1個速くできた所を記録する']},
+  {id:"C09",kw:["壊した","傷つけ","材料","道具","機械","ダメにした","折った","無駄にした"],
+   parts:['材料/道具をやったか。金がかかると、よけいこたえる。だが順番に見ろ。',
+     '壊れたのは"モノ"だ。金で戻る。お前の信用は、次の一手で戻せる。',
+     '道具の失敗は「知らなかった」か「急いだ」のどっちかで大体起きる。人格じゃなく、情報と余裕の問題だ。だから次は情報を1個足せばいい。',
+     '次はここだ ↓',
+     '火入れ完了。モノは戻る。隠すと信用が戻らん。それだけ守れ。'],
+   choices:['なぜ壊れたか原因を1個だけ書く','正しい使い方/扱いを1点、先輩か手順書で確認する','弁償/報告が要るなら、隠さず先に言う段取りを決める']},
+  {id:"C10",kw:["向いてない","辞めたい","続けられ","才能ない","逃げたい","もう無理"],
+   parts:['「向いてない」——その言葉が出る日は、たいてい疲れてる日だ。まずそこを疑え。',
+     '今きついのは"今の状況"で、それは"この仕事に向いてない証明"じゃない。疲労は判断を暗くする。',
+     '人は疲れると「全部ダメ」「ずっとこうだ」と極端に考えるようにできてる（脳のクセ）。だから重い決断は、疲れが抜けてからでいい。今日の判断は、今日の疲れの分だけ割り引け。',
+     '次はここだ ↓',
+     '火入れ完了。辞めるかどうかは、寝てから決めろ。今日は預かっとく。'],
+   choices:['今日は決断しない。飯食って寝る、だけ決める','「向いてない」と思った具体的な場面を1個だけ書く','しんどさが続くなら、相談先を1つ見ておく']}
+];
+var FALLBACK = {id:"C00",
+  parts:['何かやっちまったんだな。まず、書いた時点で半分片づいてる。',
+    '起きたのは"出来事"だ。お前の値打ちとは別だ。',
+    '失敗は隠すと大きく見え、言葉にすると等身大に縮む。脳がそういう風にできてる。',
+    '次はここだ ↓',
+    '火入れ完了。書いた分だけ、鈍らずに済んだ。'],
+  choices:['何が起きたか一言で書く','次どうするか1個だけ決める','今日はここまでにする']};
+
+var mem = {log:[]};
+function canLS(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}}
+var HAS_LS = canLS();
+function loadLog(){
+  if(HAS_LS){try{return JSON.parse(localStorage.getItem("reforge_log")||"[]");}catch(e){return [];}}
+  return mem.log;
+}
+function saveLog(arr){
+  if(HAS_LS){try{localStorage.setItem("reforge_log",JSON.stringify(arr));}catch(e){}}
+  mem.log=arr;
+}
+function todayKey(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function addLog(entry){
+  var arr=loadLog();
+  entry.ts=Date.now();
+  entry.day=todayKey();
+  arr.unshift(entry);
+  saveLog(arr);
+  refreshStreak();
+}
+
+function refreshStreak(){
+  var arr=loadLog();
+  var days={};
+  arr.forEach(function(e){days[e.day]=true;});
+  function key(dt){return dt.getFullYear()+"-"+(dt.getMonth()+1)+"-"+dt.getDate();}
+  var d=new Date();
+  if(!days[key(d)]){d.setDate(d.getDate()-1);}
+  var streak=0;
+  for(var i=0;i<400;i++){
+    if(days[key(d)]){streak++;d.setDate(d.getDate()-1);}
+    else{break;}
+  }
+  var hdr=document.getElementById("hdrStreak");
+  var big=document.getElementById("streakBig");
+  var sub=document.getElementById("streakSub");
+  big.textContent=streak;
+  hdr.innerHTML=streak>0?('🔥 '+streak+' <small>日</small>'):'';
+  if(streak===0){sub.textContent='まだ火が入ってない。今日、失敗を1個火入れすれば刃が入る。';}
+  else{sub.textContent='刃が入ってる。休んでも罰はない——鈍ったら、また研ぎ直せばいい。';}
+}
+
+var HAS_TTS = ("speechSynthesis" in window);
+var voiceCfg = {pitch:0.8, rate:0.95, voiceName:""};
+function loadVoiceCfg(){
+  if(HAS_LS){try{var v=JSON.parse(localStorage.getItem("reforge_voice")||"null");if(v)voiceCfg=v;}catch(e){}}
+}
+function saveVoiceCfg(){ if(HAS_LS){try{localStorage.setItem("reforge_voice",JSON.stringify(voiceCfg));}catch(e){}} }
+function jaVoices(){
+  var vs=window.speechSynthesis?window.speechSynthesis.getVoices():[];
+  var ja=vs.filter(function(v){return v.lang&&v.lang.indexOf("ja")===0;});
+  return ja.length?ja:vs;
+}
+function pickVoice(){
+  var vs=jaVoices();
+  if(voiceCfg.voiceName){for(var i=0;i<vs.length;i++){if(vs[i].name===voiceCfg.voiceName)return vs[i];}}
+  return vs.length?vs[0]:null;
+}
+function speak(text){
+  if(!HAS_TTS)return false;
+  if(window.speechSynthesis.speaking){window.speechSynthesis.cancel();return true;}
+  var u=new SpeechSynthesisUtterance(text);
+  u.lang="ja-JP";u.rate=voiceCfg.rate;u.pitch=voiceCfg.pitch;
+  var v=pickVoice();if(v)u.voice=v;
+  window.speechSynthesis.speak(u);
+  return true;
+}
+
+var current=0;
+function dayIndex(len){var d=new Date();return (d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate())%len;}
+function renderCard(){
+  var c=CARDS[current];
+  document.getElementById("card").innerHTML=
+    '<span class="track '+c.track+'">'+c.track+'</span>'+
+    '<h1>'+c.title+'</h1>'+
+    '<div class="body">'+c.body+'</div>'+
+    '<div class="hiire"><span class="label">🔥 火入れ</span><br>'+c.hiire+'</div>';
+  var note=document.getElementById("note");
+  if(c.reference){note.style.display="block";note.textContent="要確認：これは目安。正確な相談は正式版の公的窓口へ。";}
+  else{note.style.display="none";}
+}
+
+function classify(text){
+  for(var i=0;i<CRISIS.length;i++){if(text.indexOf(CRISIS[i])>=0)return "SAFE";}
+  var best=null,bestScore=0;
+  CATS.forEach(function(cat){
+    var s=0;
+    cat.kw.forEach(function(k){if(text.indexOf(k)>=0)s++;});
+    if(s>bestScore){bestScore=s;best=cat;}
+  });
+  return bestScore>0?best:FALLBACK;
+}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function renderResult(text){
+  var cat=classify(text);
+  var box=document.getElementById("result");
+  if(cat==="SAFE"){
+    box.innerHTML='<div class="safe"><h2>ここは、俺の手に負える話じゃない</h2>'+
+      '<div style="font-size:14px;color:#f0d9d2;">ちゃんとした相手に繋ぐ。あんたは一人じゃない。</div>'+
+      '<div style="font-size:14px;">・いのちの電話 0570-783-556（10〜22時）<br>・よりそいホットライン 0120-279-338</div>'+
+      '<div style="font-size:12px;color:var(--muted)">※正式版で各言語（比・越）の窓口も掲載予定。</div></div>';
+    return;
+  }
+  var partsHtml='';
+  for(var i=0;i<5;i++){
+    partsHtml+='<div class="part"><span class="n">'+(i+1)+'</span><span>'+esc(cat.parts[i])+'</span></div>';
+  }
+  var choicesHtml='';
+  cat.choices.forEach(function(ch,idx){
+    choicesHtml+='<button class="choice" data-i="'+idx+'">'+esc(ch)+'</button>';
+  });
+  box.innerHTML=
+    '<div class="card"><div style="display:flex;align-items:center;gap:8px"><span class="track" style="color:var(--ember);border-color:var(--ember-dim)">親方</span>'+
+    '<button class="ghost" id="speakResult" aria-label="読み上げ" style="margin-left:auto;padding:6px 12px;font-size:14px">🔊</button></div>'+
+    '<div class="oyakata">'+partsHtml+'</div>'+
+    '<div class="choices" style="margin-top:4px">'+choicesHtml+'</div>'+
+    '<button class="primary" id="saveHiire" style="width:100%;margin-top:6px" disabled>次の一手を選んで火入れ</button></div>';
+  var speakBtn2=document.getElementById("speakResult");
+  if(speakBtn2){speakBtn2.addEventListener("click",function(){speak(cat.parts.join(" "));});}
+  var chosen=null;
+  var choiceBtns=box.querySelectorAll(".choice");
+  choiceBtns.forEach(function(b){
+    b.addEventListener("click",function(){
+      choiceBtns.forEach(function(x){x.classList.remove("sel");});
+      b.classList.add("sel");chosen=b.textContent;
+      var sb=document.getElementById("saveHiire");sb.disabled=false;sb.textContent="🔥 これで火入れする";
+    });
+  });
+  document.getElementById("saveHiire").addEventListener("click",function(){
+    if(!chosen)return;
+    addLog({type:"translate",cat:cat.id,text:text,action:chosen});
+    box.innerHTML='<div class="card" style="align-items:center;text-align:center;gap:10px">'+
+      '<div style="font-size:32px">🔥</div><div style="font-weight:800;font-size:17px">火入れ完了</div>'+
+      '<div style="font-size:14px;color:#cfcfd6">今日ので一個、賢くなった。記録に残した。</div>'+
+      '<button class="ghost" onclick="go(\'log\')">記録を見る</button></div>';
+    document.getElementById("shikujiri").value="";
+  });
+}
+
+function renderLog(){
+  var arr=loadLog();
+  var list=document.getElementById("logList");
+  if(arr.length===0){list.innerHTML='<div class="empty">まだ記録がない。<br>失敗を1個、火入れするところから。</div>';return;}
+  var html='';
+  arr.forEach(function(e){
+    var d=new Date(e.ts);
+    var ds=(d.getMonth()+1)+"月"+d.getDate()+"日 "+("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2);
+    html+='<div class="logitem"><div class="date">'+ds+(e.cat?(' · '+e.cat):'')+'</div>'+
+      '<div class="txt">'+esc(e.text||e.title||"")+'</div>'+
+      (e.action?('<div class="act">→ '+esc(e.action)+'</div>'):'')+'</div>';
+  });
+  list.innerHTML=html;
+}
+
+function go(v){
+  document.querySelectorAll(".view").forEach(function(s){s.classList.remove("active");});
+  document.getElementById("view-"+v).classList.add("active");
+  document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-view")===v);});
+  if(v==="log"){renderLog();refreshStreak();}
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("nav button").forEach(function(b){
+  b.addEventListener("click",function(){go(b.getAttribute("data-view"));});
+});
+
+document.getElementById("reloadBtn").addEventListener("click",function(){window.speechSynthesis&&window.speechSynthesis.cancel();current=(current+1)%CARDS.length;renderCard();});
+document.getElementById("speakBtn").addEventListener("click",function(){
+  var c=CARDS[current];
+  var ok=speak(c.title+"。"+c.body+" 火入れ。"+c.hiire);
+  if(!ok){var s=document.getElementById("status");s.textContent="※このブラウザは読み上げに未対応。";setTimeout(function(){s.textContent="";},2500);}
+});
+document.getElementById("hiireBtn").addEventListener("click",function(){
+  addLog({type:"card",title:CARDS[current].title,text:"[今日のカード] "+CARDS[current].title,action:"火入れした"});
+  var s=document.getElementById("status");
+  s.innerHTML='🔥 火入れ完了。記録に残した。';
+  setTimeout(function(){s.textContent="";},2000);
+});
+document.getElementById("translateBtn").addEventListener("click",function(){
+  var t=document.getElementById("shikujiri").value.trim();
+  if(!t){document.getElementById("result").innerHTML='<div class="empty">まず、やっちまったことを打て。</div>';return;}
+  renderResult(t);
+});
+
+var PRESETS={oyakata:{pitch:0.7,rate:0.9},normal:{pitch:1.0,rate:1.0},fast:{pitch:1.0,rate:1.3}};
+function fillVoiceList(){
+  var sel=document.getElementById("voiceSel");
+  var vs=jaVoices();
+  if(!vs.length){sel.innerHTML='<option value="">（端末に日本語音声が見つからない）</option>';return;}
+  sel.innerHTML=vs.map(function(v){
+    var s=(v.name===voiceCfg.voiceName)?" selected":"";
+    return '<option value="'+esc(v.name)+'"'+s+'>'+esc(v.name)+' ('+v.lang+')</option>';
+  }).join("");
+}
+function syncVoiceUI(){
+  document.getElementById("pitch").value=voiceCfg.pitch;
+  document.getElementById("pitchV").textContent=voiceCfg.pitch.toFixed(1);
+  document.getElementById("rate").value=voiceCfg.rate;
+  document.getElementById("rateV").textContent=voiceCfg.rate.toFixed(2);
+}
+function setupVoiceSettings(){
+  loadVoiceCfg();
+  syncVoiceUI();
+  fillVoiceList();
+  if(window.speechSynthesis){window.speechSynthesis.onvoiceschanged=fillVoiceList;}
+  document.getElementById("pitch").addEventListener("input",function(){
+    voiceCfg.pitch=parseFloat(this.value);document.getElementById("pitchV").textContent=voiceCfg.pitch.toFixed(1);saveVoiceCfg();
+    document.querySelectorAll("#voicePreset button").forEach(function(b){b.classList.remove("sel");});
+  });
+  document.getElementById("rate").addEventListener("input",function(){
+    voiceCfg.rate=parseFloat(this.value);document.getElementById("rateV").textContent=voiceCfg.rate.toFixed(2);saveVoiceCfg();
+    document.querySelectorAll("#voicePreset button").forEach(function(b){b.classList.remove("sel");});
+  });
+  document.getElementById("voiceSel").addEventListener("change",function(){voiceCfg.voiceName=this.value;saveVoiceCfg();});
+  document.querySelectorAll("#voicePreset button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var p=PRESETS[b.getAttribute("data-p")];voiceCfg.pitch=p.pitch;voiceCfg.rate=p.rate;saveVoiceCfg();syncVoiceUI();
+      document.querySelectorAll("#voicePreset button").forEach(function(x){x.classList.remove("sel");});b.classList.add("sel");
+    });
+  });
+  document.getElementById("testVoice").addEventListener("click",function(){
+    var ok=speak("おう。やっちまったか。だがそれは、お前がダメな証拠じゃねえ。次はここだ。");
+    var n=document.getElementById("voiceNote");
+    if(!ok){n.style.display="block";n.textContent="※このブラウザ/端末は読み上げに未対応か、日本語音声が入っていません。";}
+  });
+}
+
+setupVoiceSettings();
+current=dayIndex(CARDS.length);
+var tday=new Date();
+document.getElementById("today").textContent="— "+(tday.getMonth()+1)+"月"+tday.getDate()+"日 の1枚 —";
+renderCard();
+refreshStreak();
+if(!HAS_LS){document.getElementById("status").textContent="※このブラウザは保存制限あり。記録はこのセッション内のみ。";}
+
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+</script>
+</body>
+</html>
