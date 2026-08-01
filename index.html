@@ -11,7 +11,8 @@
 <style>
   :root{
     --bg:#0e0e10; --surface:#17171b; --surface-2:#1f1f25; --line:#2a2a31;
-    --text:#ececf0; --muted:#9a9aa6; --ember:#ff6a2b; --ember-dim:#b8461c; --steel:#7fb0c8;
+    --text:#ececf0; --muted:#9a9aa6; --ember:#ff6a2b; --ember-dim:#b8461c;
+    --steel:#7fb0c8; --moss:#8fbf7f;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
@@ -21,6 +22,7 @@
     line-height:1.75;display:flex;flex-direction:column;min-height:100%;
   }
   header{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5;}
+  header.hide{display:none;}
   header .mark{width:24px;height:24px;flex:none;}
   header .wordmark{font-weight:800;letter-spacing:3px;font-size:14px;}
   header .streak{margin-left:auto;font-size:12px;color:var(--ember);font-weight:700;}
@@ -33,6 +35,7 @@
   .track{align-self:flex-start;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);}
   .track.HEAD{color:var(--steel);border-color:#274653;}
   .track.SHIELD{color:var(--ember);border-color:var(--ember-dim);}
+  .track.BODY{color:var(--moss);border-color:#3d5c36;}
   .card h1{font-size:20px;line-height:1.45;font-weight:800;}
   .card .body{font-size:15px;color:#d6d6dd;}
   .hiire{background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--ember);border-radius:10px;padding:13px;font-size:14px;}
@@ -56,7 +59,6 @@
   .choice.sel{border-color:var(--ember);color:#fff;}
   .safe{background:#241012;border:1px solid #5a2226;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px;}
   .safe h2{font-size:17px;color:#ffb4a0;font-weight:800;}
-  .safe a{color:var(--steel);}
   .logitem{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:6px;}
   .logitem .date{font-size:11px;color:var(--muted);letter-spacing:1px;}
   .logitem .txt{font-size:14px;color:#e2e2e8;}
@@ -67,8 +69,9 @@
   .streakbox .sub{font-size:13px;color:#cfcfd6;margin-top:10px;}
   .empty{color:var(--muted);font-size:14px;text-align:center;padding:30px 10px;}
   nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--line);display:flex;max-width:620px;margin:0 auto;}
-  nav button{flex:1;background:transparent;border:none;border-radius:0;color:var(--muted);font-size:12px;font-weight:700;padding:12px 4px 16px;display:flex;flex-direction:column;align-items:center;gap:4px;}
-  nav button .ic{font-size:20px;line-height:1;}
+  nav.hide{display:none;}
+  nav button{flex:1;background:transparent;border:none;border-radius:0;color:var(--muted);font-size:11px;font-weight:700;padding:11px 2px 15px;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  nav button .ic{font-size:19px;line-height:1;}
   nav button.on{color:var(--ember);}
   .status{font-size:11px;color:var(--muted);text-align:center;}
   .setrow{display:flex;align-items:center;gap:12px;}
@@ -79,10 +82,55 @@
   .preset{display:flex;gap:8px;flex-wrap:wrap;}
   .preset button{flex:1;min-width:90px;background:var(--surface-2);border:1px solid var(--line);color:var(--text);font-size:13px;padding:11px 8px;}
   .preset button.sel{border-color:var(--ember);color:#fff;}
+  #intro{position:fixed;inset:0;background:var(--bg);z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 26px;text-align:center;}
+  #intro.show{display:flex;}
+  #intro .flame{width:96px;height:96px;margin-bottom:22px;animation:rise .9s ease-out;}
+  #intro h1{font-size:30px;font-weight:800;letter-spacing:6px;margin-bottom:8px;}
+  #intro .tag{font-size:14px;color:var(--ember);letter-spacing:2px;margin-bottom:30px;}
+  #intro .msg{font-size:16px;line-height:2;color:#d6d6dd;max-width:340px;margin-bottom:34px;}
+  #intro .msg strong{color:var(--text);font-weight:800;}
+  #intro button{width:100%;max-width:300px;background:var(--ember);color:#14100d;}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .greet{font-size:22px;font-weight:800;line-height:1.5;}
+  .greet span{color:var(--ember);}
+  .menugrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 16px;display:flex;flex-direction:column;align-items:flex-start;gap:7px;cursor:pointer;text-align:left;font-family:inherit;color:var(--text);}
+  .tile:active{border-color:var(--ember-dim);}
+  .tile .ic{font-size:26px;line-height:1;}
+  .tile .t{font-size:15px;font-weight:800;}
+  .tile .d{font-size:12px;color:var(--muted);line-height:1.6;font-weight:400;}
+  .tile.wide{grid-column:1 / -1;flex-direction:row;align-items:center;gap:14px;}
+  .tile.wide .txt{display:flex;flex-direction:column;gap:3px;}
+  .drill{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 17px;display:flex;flex-direction:column;gap:9px;}
+  .drill .h{display:flex;align-items:center;gap:9px;}
+  .drill .h .n{flex:none;width:24px;height:24px;border-radius:6px;background:var(--surface-2);border:1px solid var(--line);color:var(--moss);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  .drill .h .t{font-size:15.5px;font-weight:800;}
+  .drill .why{font-size:13px;color:var(--muted);}
+  .drill .how{font-size:14px;color:#d6d6dd;}
+  .drill .time{font-size:12px;color:var(--moss);font-weight:700;}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:2px;}
+  .seg button{flex:1;min-width:88px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);font-size:13px;padding:10px 6px;}
+  .seg button.on{border-color:var(--moss);color:var(--moss);}
 </style>
 </head>
 <body>
-<header>
+
+<div id="intro">
+  <svg class="flame" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 15c2.5-6 5.5-9 9-11 0 3-1 5-2 7 2-1 4-1 6 0-1 4-4 8-9 9-3 .8-5-1-4-5z" fill="#ff6a2b"/>
+  </svg>
+  <h1>REFORGE</h1>
+  <div class="tag">折れない頭を作る</div>
+  <div class="msg">
+    数をこなす仕事は、失敗の数も増える。<br>
+    それは腕が悪いんじゃない、鍛えてる証拠だ。<br><br>
+    折れた鉄は、もう一度火を入れれば強くなる。<br>
+    <strong>REFORGE、きっとうまくいく。</strong>
+  </div>
+  <button id="introBtn">はじめる</button>
+</div>
+
+<header id="hdr">
   <svg class="mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
     <path d="M4 15c2.5-6 5.5-9 9-11 0 3-1 5-2 7 2-1 4-1 6 0-1 4-4 8-9 9-3 .8-5-1-4-5z" fill="#ff6a2b"/>
   </svg>
@@ -91,7 +139,37 @@
 </header>
 
 <main>
-  <section class="view active" id="view-today">
+  <section class="view active" id="view-home">
+    <div class="greet" id="greet"></div>
+    <div class="menugrid">
+      <button class="tile wide" data-go="today">
+        <span class="ic">🔥</span>
+        <span class="txt"><span class="t">今日の1枚</span><span class="d">90秒で読める、頭と守りの知識</span></span>
+      </button>
+      <button class="tile" data-go="translate">
+        <span class="ic">🛠</span>
+        <span class="t">しくじり翻訳</span>
+        <span class="d">やっちまった事を、親方が捉え直す</span>
+      </button>
+      <button class="tile" data-go="body">
+        <span class="ic">💪</span>
+        <span class="t">体のメンテ</span>
+        <span class="d">現場で効くストレッチと鍛え方</span>
+      </button>
+      <button class="tile" data-go="log">
+        <span class="ic">📓</span>
+        <span class="t">鍛えた記録</span>
+        <span class="d">火入れの履歴とストリーク</span>
+      </button>
+      <button class="tile" data-go="settings">
+        <span class="ic">🔊</span>
+        <span class="t">声の設定</span>
+        <span class="d">親方の声を調整する</span>
+      </button>
+    </div>
+  </section>
+
+  <section class="view" id="view-today">
     <div class="eyebrow" id="today">— TODAY —</div>
     <div class="card" id="card"></div>
     <div class="note" id="note" style="display:none"></div>
@@ -113,6 +191,24 @@
     <div id="result"></div>
   </section>
 
+  <section class="view" id="view-body">
+    <div class="eyebrow">— 体のメンテ —</div>
+    <div class="card" style="gap:9px">
+      <span class="track BODY">BODY</span>
+      <h1 style="font-size:18px">腰痛は、熱中症と同じくらい現場を潰す</h1>
+      <div class="body" style="font-size:14px">2020年の建設業で、腰痛を起こしたのは222名。熱中症は215名。つまり腰痛は「気をつけろ」と言われる熱中症と同じ規模の職業病だ。違いは、腰は一日で壊れず、少しずつ削れて、ある日動かなくなること。だから対策も一日じゃなく、毎日1分でいい。</div>
+    </div>
+    <div class="seg" id="bodySeg">
+      <button data-b="all" class="on">全部</button>
+      <button data-b="stretch">ストレッチ</button>
+      <button data-b="train">鍛える</button>
+      <button data-b="focus">集中を出す</button>
+    </div>
+    <div id="drills"></div>
+    <button class="primary" id="bodyDone" style="width:100%">🔥 今日の体メンテ、火入れ</button>
+    <div class="status" id="bodyStatus"></div>
+  </section>
+
   <section class="view" id="view-settings">
     <div class="eyebrow">— 声の設定 —</div>
     <div class="card">
@@ -129,6 +225,7 @@
       <button class="primary" id="testVoice" style="width:100%">この声で試す</button>
     </div>
     <div class="note" id="voiceNote" style="display:none"></div>
+    <button class="ghost" id="showIntro" style="width:100%">イントロをもう一度見る</button>
   </section>
 
   <section class="view" id="view-log">
@@ -142,11 +239,12 @@
   </section>
 </main>
 
-<nav>
-  <button class="on" data-view="today"><span class="ic">🔥</span>今日</button>
+<nav id="nav">
+  <button class="on" data-view="home"><span class="ic">🏠</span>ホーム</button>
+  <button data-view="today"><span class="ic">🔥</span>今日</button>
   <button data-view="translate"><span class="ic">🛠</span>しくじり</button>
+  <button data-view="body"><span class="ic">💪</span>体</button>
   <button data-view="log"><span class="ic">📓</span>記録</button>
-  <button data-view="settings"><span class="ic">🔊</span>声</button>
 </nav>
 
 <script>
@@ -160,6 +258,9 @@ var CARDS = [
   {track:"HEAD",title:'睡眠を削った腕は、酔った腕と同じだ',
    body:'「気合いで乗り切る」が一番きかないのが、寝不足だ。17〜19時間起き続けた人間の作業精度は、酒気帯びと同レベルまで落ちるという報告がある。つまり寝ないで頑張るほど、失敗の数が構造的に増える。根性の問題じゃない、計器の問題だ。腕を落としたくないなら、まず削るのは睡眠じゃない。',
    hiire:'昨日の睡眠時間を1タップ記録。今日のミスと並べて見てみろ。'},
+  {track:"BODY",title:'腰は一日で壊れない。毎日少しずつ削れて、ある日止まる',
+   body:'2020年の建設業で腰痛を起こしたのは222名。熱中症は215名だ。つまり「気をつけろ」と散々言われる熱中症と、腰痛は同じ規模で現場を潰してる。違いは壊れ方だけ。熱中症は今日倒れるが、腰は5年かけて削れて、ある日動かなくなる。だから対策も派手じゃなくていい。1日1分の貯金が、10年後の腕を残す。',
+   hiire:'今日、腰を1分伸ばしたか記録しろ。体メンテの画面に型がある。'},
   {track:"SHIELD",title:'その怪我、「自分のミスだから」で泣き寝入りするな',
    body:'現場でケガをした。自分の不注意だった。だから労災は使えない——これは間違いだ。労災保険は、原則として本人の過失があっても給付される（重大な故意等の例外を除く）。「迷惑をかける」「気まずい」で申請しないと、治療費も休業補償も自腹になる。それはあなたが払う金じゃない。制度が払う金だ。',
    hiire:'今日ヒヤリとした場面を1個記録。次に活かすか、報告するか決めろ。',reference:true},
@@ -169,6 +270,45 @@ var CARDS = [
   {track:"SHIELD",title:'残業代は「もらえたら」じゃない。「発生してる」だ',
    body:'定時を超えて働いた分は、頼まなくても法律上すでに発生している。会社が払わないのは、権利が無いからじゃなく、あなたが記録していないからだ。証拠は難しくない——自分で毎日、始業と終業の時刻をメモするだけでいい。それが後で、あなたの金を取り戻す一番強い材料になる。',
    hiire:'今日の始業・終業時刻を記録。これは"火入れ"であり"証拠"だ。',reference:true}
+];
+
+var DRILLS = [
+  {cat:"stretch",t:"天井作業のあとの首・肩ほぐし",time:"60秒",
+   why:"溶接・配管・内装——上を向く作業は首の後ろと肩が縮んだまま固まる。放置すると腕のしびれまで来る。",
+   how:"① 顎を軽く引いて、後頭部を真後ろに押す（10秒×3）。② 片手を頭に添えて、首を横に倒す（左右15秒ずつ）。③ 肩を耳まで上げて、ストンと落とす（10回）。"},
+  {cat:"stretch",t:"腰を守る「1分の貯金」",time:"60秒",
+   why:"前かがみが続くと、腰の筋肉が伸びきったまま固まる。腰痛は一日でなく、この積み重ねで来る。",
+   how:"① 立ったまま両手を腰に当て、上体を軽く後ろに反らす（5秒×5）。反りすぎない、痛くない範囲。② 片膝を胸に抱えて15秒（左右）。③ 仰向けで膝を立て、左右にゆっくり倒す（10往復）。"},
+  {cat:"stretch",t:"しゃがみ仕事のあとの股関節リセット",time:"45秒",
+   why:"しゃがみ・膝立ちが続くと股関節の前が縮む。ここが硬いと、腰が代わりに働いて腰痛になる。",
+   how:"① 片膝立ちで、腰を前にスライド（前ももの付け根が伸びる）15秒×左右。② 立って足を大きく開き、内ももを伸ばす15秒。"},
+  {cat:"stretch",t:"握力と手首を戻す（工具握りっぱなし対策）",time:"40秒",
+   why:"グラインダー・インパクトの振動と握りっぱなしで、前腕がパンパンに。腱鞘炎の入口。",
+   how:"① 腕を前に伸ばし、手のひらを上→反対の手で指を手前に引く15秒。② 手のひらを下にして同様に15秒。③ 手をグーパー20回、ゆっくり。"},
+  {cat:"train",t:"腰を壊さない体幹（プランク）",time:"1〜2分",
+   why:"腰痛予防で一番効くのは腹筋運動じゃなく、体幹の「持久力」。重い物を持つ瞬間に腰を守る土台になる。",
+   how:"肘とつま先で体を一直線に支える。20〜40秒×2〜3セット。腰が落ちる/上がるならヒザをついてOK。呼吸は止めない。"},
+  {cat:"train",t:"持ち上げの型（ヒップヒンジ）",time:"1分",
+   why:"重い物を「腰で持つ」か「股関節で持つ」かで、5年後が変わる。型を体に入れておくと、疲れてても自動で守れる。",
+   how:"足を肩幅、胸を張ったままお尻を後ろに引く（膝は軽く曲がる）。背中は丸めない。10回×2セット。慣れたら物を持って。"},
+  {cat:"train",t:"肩の後ろを鍛える（前肩・巻き肩の対策）",time:"1分",
+   why:"前で作業ばかりだと肩が内に巻き、首肩こりと五十肩の下地になる。後ろ側を鍛えると姿勢が戻る。",
+   how:"① 壁に背中・後頭部・腕をつけて、バンザイ→下ろすを10回。② タオルを両手で持ち、肩甲骨を寄せて後ろに引く15回。"},
+  {cat:"train",t:"脚のバネを戻す（現場で踏ん張る足）",time:"1分",
+   why:"足腰の踏ん張りが落ちると、腰と膝が代わりに負担を背負う。転倒・つまずきの予防にもなる。",
+   how:"椅子スクワット10回×2（椅子に軽く触れて立つ）。かかと上げ20回。膝はつま先の向きに。"},
+  {cat:"focus",t:"箱呼吸（ボックス・ブリージング）",time:"60秒",
+   why:"軍や消防が現場で使う型。4拍で区切る呼吸は心拍を落ち着け、緊張下でも手元が狂わなくなる。危険作業の前に。",
+   how:"吸う4秒 → 止める4秒 → 吐く4秒 → 止める4秒。これを4〜6周。鼻から吸って、鼻か口から細く吐く。"},
+  {cat:"focus",t:"生理的ため息（一発で切り替える）",time:"20秒",
+   why:"カッとした時、焦った時に一番速く効く。二段階で吸って長く吐くと、体が強制的に落ち着く。怒鳴られた直後にも。",
+   how:"鼻から吸う → もう一口ちょい足しで吸う → 口から長〜く吐き切る。これを2〜3回だけ。"},
+  {cat:"focus",t:"作業前の3点チェック（体の火入れ）",time:"30秒",
+   why:"ヨガや武術の準備動作と同じ理屈。体を一度整えると、注意が散らずに手元に集まる。事故の多い「急ぎの時」ほど効く。",
+   how:"① 足裏全体で床を感じて立つ（5秒）。② 息を長く吐きながら肩を落とす（3回）。③ 今からやる作業を口の中で一言つぶやく。"},
+  {cat:"focus",t:"疲れた午後の30秒リセット",time:"30秒",
+   why:"午後の集中低下は根性でなく血流と姿勢の問題。短く体を動かす方が、休憩でスマホを見るより回復する。",
+   how:"立ち上がって背伸び10秒 → 首をゆっくり回す10秒 → 目を閉じて遠くを見るイメージ10秒。可能なら水を一口。"}
 ];
 
 var CRISIS = ["死にたい","消えたい","生きてる意味","自殺","首を","飛び降り","いなくなりたい","全部終わり","誰も助け"];
@@ -243,7 +383,14 @@ var CATS = [
      '人は疲れると「全部ダメ」「ずっとこうだ」と極端に考えるようにできてる（脳のクセ）。だから重い決断は、疲れが抜けてからでいい。今日の判断は、今日の疲れの分だけ割り引け。',
      '次はここだ ↓',
      '火入れ完了。辞めるかどうかは、寝てから決めろ。今日は預かっとく。'],
-   choices:['今日は決断しない。飯食って寝る、だけ決める','「向いてない」と思った具体的な場面を1個だけ書く','しんどさが続くなら、相談先を1つ見ておく']}
+   choices:['今日は決断しない。飯食って寝る、だけ決める','「向いてない」と思った具体的な場面を1個だけ書く','しんどさが続くなら、相談先を1つ見ておく']},
+  {id:"C11",kw:["腰","肩こり","首","痛い","しびれ","膝","体が","だる"],
+   parts:['体が来たか。それは根性の話じゃない、消耗の話だ。',
+     '痛いのは"使い方と回復の差"だ。お前が弱いんじゃない。',
+     '腰痛は建設業で熱中症と同じ規模で起きてる。つまり個人の不注意じゃなく、この仕事の構造的な職業病だ。だから対策も個人の我慢でなく、毎日1分の型でいい。',
+     '次はここだ ↓',
+     '火入れ完了。体は替えが効かん。10年後の腕を守れ。'],
+   choices:['体のメンテ画面で、該当する型を1個やる','痛みが2週間続くなら、病院に行く日を決める','明日の作業で、一番腰に来る動作を1個だけ変える']}
 ];
 var FALLBACK = {id:"C00",
   parts:['何かやっちまったんだな。まず、書いた時点で半分片づいてる。',
@@ -289,10 +436,13 @@ function refreshStreak(){
   var hdr=document.getElementById("hdrStreak");
   var big=document.getElementById("streakBig");
   var sub=document.getElementById("streakSub");
-  big.textContent=streak;
-  hdr.innerHTML=streak>0?('🔥 '+streak+' <small>日</small>'):'';
-  if(streak===0){sub.textContent='まだ火が入ってない。今日、失敗を1個火入れすれば刃が入る。';}
-  else{sub.textContent='刃が入ってる。休んでも罰はない——鈍ったら、また研ぎ直せばいい。';}
+  if(big)big.textContent=streak;
+  if(hdr)hdr.innerHTML=streak>0?('🔥 '+streak+' <small>日</small>'):'';
+  if(sub){
+    if(streak===0){sub.textContent='まだ火が入ってない。今日、何か1個火入れすれば刃が入る。';}
+    else{sub.textContent='刃が入ってる。休んでも罰はない——鈍ったら、また研ぎ直せばいい。';}
+  }
+  return streak;
 }
 
 var HAS_TTS = ("speechSynthesis" in window);
@@ -335,6 +485,21 @@ function renderCard(){
   else{note.style.display="none";}
 }
 
+var bodyFilter="all";
+function renderDrills(){
+  var list=DRILLS.filter(function(d){return bodyFilter==="all"||d.cat===bodyFilter;});
+  var html="";
+  list.forEach(function(d,i){
+    html+='<div class="drill" style="margin-bottom:10px">'+
+      '<div class="h"><span class="n">'+(i+1)+'</span><span class="t">'+esc(d.t)+'</span></div>'+
+      '<div class="time">⏱ '+esc(d.time)+'</div>'+
+      '<div class="why">'+esc(d.why)+'</div>'+
+      '<div class="how">'+esc(d.how)+'</div>'+
+    '</div>';
+  });
+  document.getElementById("drills").innerHTML=html;
+}
+
 function classify(text){
   for(var i=0;i<CRISIS.length;i++){if(text.indexOf(CRISIS[i])>=0)return "SAFE";}
   var best=null,bestScore=0;
@@ -345,7 +510,7 @@ function classify(text){
   });
   return bestScore>0?best:FALLBACK;
 }
-function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function renderResult(text){
   var cat=classify(text);
   var box=document.getElementById("result");
@@ -395,7 +560,7 @@ function renderResult(text){
 function renderLog(){
   var arr=loadLog();
   var list=document.getElementById("logList");
-  if(arr.length===0){list.innerHTML='<div class="empty">まだ記録がない。<br>失敗を1個、火入れするところから。</div>';return;}
+  if(arr.length===0){list.innerHTML='<div class="empty">まだ記録がない。<br>何か1個、火入れするところから。</div>';return;}
   var html='';
   arr.forEach(function(e){
     var d=new Date(e.ts);
@@ -409,14 +574,27 @@ function renderLog(){
 
 function go(v){
   document.querySelectorAll(".view").forEach(function(s){s.classList.remove("active");});
-  document.getElementById("view-"+v).classList.add("active");
+  var el=document.getElementById("view-"+v);
+  if(el)el.classList.add("active");
   document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-view")===v);});
   if(v==="log"){renderLog();refreshStreak();}
+  if(v==="home"){renderGreet();}
   window.scrollTo(0,0);
 }
 document.querySelectorAll("nav button").forEach(function(b){
   b.addEventListener("click",function(){go(b.getAttribute("data-view"));});
 });
+document.querySelectorAll(".tile").forEach(function(t){
+  t.addEventListener("click",function(){go(t.getAttribute("data-go"));});
+});
+
+function renderGreet(){
+  var h=new Date().getHours();
+  var when = h<5?"夜中だな":h<11?"おはよう":h<17?"お疲れさん":h<22?"今日も終わったな":"遅くまでご苦労さん";
+  var s=refreshStreak();
+  var line = s>0 ? ('連続 <span>'+s+'日</span>。刃は入ってる。') : 'まだ火が入ってない。1個でいい。';
+  document.getElementById("greet").innerHTML=when+'。<br><span style="font-size:15px;font-weight:400;color:#cfcfd6">'+line+'</span>';
+}
 
 document.getElementById("reloadBtn").addEventListener("click",function(){window.speechSynthesis&&window.speechSynthesis.cancel();current=(current+1)%CARDS.length;renderCard();});
 document.getElementById("speakBtn").addEventListener("click",function(){
@@ -434,6 +612,18 @@ document.getElementById("translateBtn").addEventListener("click",function(){
   var t=document.getElementById("shikujiri").value.trim();
   if(!t){document.getElementById("result").innerHTML='<div class="empty">まず、やっちまったことを打て。</div>';return;}
   renderResult(t);
+});
+document.querySelectorAll("#bodySeg button").forEach(function(b){
+  b.addEventListener("click",function(){
+    document.querySelectorAll("#bodySeg button").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on");bodyFilter=b.getAttribute("data-b");renderDrills();
+  });
+});
+document.getElementById("bodyDone").addEventListener("click",function(){
+  addLog({type:"body",text:"[体のメンテ] 今日の体メンテを実施",action:"火入れした"});
+  var s=document.getElementById("bodyStatus");
+  s.innerHTML='🔥 火入れ完了。体は資本だ。';
+  setTimeout(function(){s.textContent="";},2200);
 });
 
 var PRESETS={oyakata:{pitch:0.7,rate:0.9},normal:{pitch:1.0,rate:1.0},fast:{pitch:1.0,rate:1.3}};
@@ -479,13 +669,33 @@ function setupVoiceSettings(){
   });
 }
 
+function showIntro(){
+  document.getElementById("intro").classList.add("show");
+  document.getElementById("hdr").classList.add("hide");
+  document.getElementById("nav").classList.add("hide");
+}
+function hideIntro(){
+  document.getElementById("intro").classList.remove("show");
+  document.getElementById("hdr").classList.remove("hide");
+  document.getElementById("nav").classList.remove("hide");
+  if(HAS_LS){try{localStorage.setItem("reforge_seen","1");}catch(e){}}
+}
+document.getElementById("introBtn").addEventListener("click",function(){hideIntro();go("home");});
+document.getElementById("showIntro").addEventListener("click",showIntro);
+
 setupVoiceSettings();
 current=dayIndex(CARDS.length);
 var tday=new Date();
 document.getElementById("today").textContent="— "+(tday.getMonth()+1)+"月"+tday.getDate()+"日 の1枚 —";
 renderCard();
+renderDrills();
+renderGreet();
 refreshStreak();
 if(!HAS_LS){document.getElementById("status").textContent="※このブラウザは保存制限あり。記録はこのセッション内のみ。";}
+
+var seen=false;
+if(HAS_LS){try{seen=localStorage.getItem("reforge_seen")==="1";}catch(e){}}
+if(!seen){showIntro();}
 
 if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
   navigator.serviceWorker.register("sw.js").catch(function(){});
